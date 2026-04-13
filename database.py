@@ -40,3 +40,4 @@ def delete_data(item_id):
     response = requests.delete(endpoint, headers=HEADERS)
     if response.status_code not in (200, 204):
         st.error("Failed to delete item.")
+# test
