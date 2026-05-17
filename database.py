@@ -1,24 +1,60 @@
 import streamlit as st
 import requests
 
-URL = st.secrets["SUPABASE_URL"]
-KEY = st.secrets["SUPABASE_KEY"]
 TIMEOUT_SECONDS = 20
 
-HEADERS = {
-    "apikey": KEY,
-    "Authorization": f"Bearer {KEY}",
-    "Content-Type": "application/json",
-    "Prefer": "return=representation",
-}
+
+def _read_secret(name: str) -> str:
+    try:
+        value = st.secrets.get(name, "")
+    except Exception:
+        value = ""
+
+    return str(value).strip() if value else ""
+
+
+URL = _read_secret("SUPABASE_URL")
+KEY = _read_secret("SUPABASE_KEY")
+
+
+def _headers():
+    return {
+        "apikey": KEY,
+        "Authorization": f"Bearer {KEY}",
+        "Content-Type": "application/json",
+        "Prefer": "return=representation",
+    }
+
+
+def _supabase_is_configured() -> bool:
+    missing = []
+    if not URL:
+        missing.append("SUPABASE_URL")
+    if not KEY:
+        missing.append("SUPABASE_KEY")
+
+    if not missing:
+        return True
+
+    st.error(f"Missing Streamlit secrets: {', '.join(missing)}")
+    st.code(
+        'SUPABASE_URL = "https://your-project-ref.supabase.co"\n'
+        'SUPABASE_KEY = "your-supabase-anon-key"\n'
+        'GOOGLE_MAPS_API_KEY = "your-google-maps-api-key"',
+        language="toml",
+    )
+    return False
 
 
 def _request(method: str, endpoint: str, **kwargs):
+    if not _supabase_is_configured():
+        return None
+
     try:
         response = requests.request(
             method=method,
             url=endpoint,
-            headers=HEADERS,
+            headers=_headers(),
             timeout=TIMEOUT_SECONDS,
             **kwargs,
         )
