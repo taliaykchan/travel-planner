@@ -98,7 +98,7 @@ st.markdown(
 
         .supplement-images-title {
             margin-top: 2.25rem;
-            margin-bottom: 0.95rem;
+            margin-bottom: 0.55rem;
             font-weight: 700;
             font-size: 1.05rem;
         }
@@ -323,7 +323,10 @@ def group_day_images(day_images: list[dict]) -> dict[int, list[dict]]:
 
 def render_day_images(trip_id: str, day: int, images: list[dict]) -> None:
     st.markdown('<div class="supplement-images-title">Supplement Images</div>', unsafe_allow_html=True)
-    with st.container(border=True):
+    image_count = len(images)
+    expander_label = f"Supplement Images ({image_count})" if image_count else "Supplement Images"
+
+    with st.expander(expander_label, expanded=bool(images)):
         uploaded_file = st.file_uploader(
             "Upload image",
             type=["png", "jpg", "jpeg", "webp"],
